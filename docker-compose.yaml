@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+    net-mon:
+        container_name: net-mon
+        image: ghcr.io/rafhaanshah/net-mon:latest
+        restart: unless-stopped
+        environment:
+          - NETMON_NOTIFICATION=tgram://bottoken/ChatID
+          - NETMON_SUBNET=192.168.1.0/24
+          - NETMON_MINUTES=60
