@@ -1,0 +1,3 @@
+python3_nmap==1.4.9
+apprise==0.9.0
+schedule==0.6.0
