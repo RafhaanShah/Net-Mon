@@ -5,6 +5,9 @@ services:
         container_name: net-mon
         image: ghcr.io/rafhaanshah/net-mon:latest
         restart: unless-stopped
+        network_mode: host # needed for nmap to get mac addresses
+        volumes:
+          - ./results:/app/results # optional, if you want to keep found hosts persistent
         environment:
           - NETMON_NOTIFICATION=tgram://bottoken/ChatID
           - NETMON_SUBNET=192.168.1.0/24

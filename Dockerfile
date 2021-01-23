@@ -15,4 +15,5 @@ RUN pip install -r requirements.txt
 
 COPY app.py .
 
+# needs to run as root for nmap to get mac addresses
 ENTRYPOINT ["python", "app.py"]

@@ -10,7 +10,7 @@ import schedule
 
 NOTIFICATION = os.getenv("NETMON_NOTIFICATION", "")
 SUBNET = os.getenv("NETMON_SUBNET", "192.168.1.0/24")
-MINUTES = os.getenv("NETMON_MINUTES", "60")
+MINUTES = os.getenv("NETMON_MINUTES", "15")
 RESULTS = "results.json"
 
 
@@ -19,6 +19,9 @@ def main():
     print("Starting Net-Mon")
 
     apprise_client = get_apprise_client(NOTIFICATION)
+    scan_and_process(apprise_client) # first run
+
+    # then every x minutes
     schedule.every(int(MINUTES)).minutes.do(scan_and_process, apprise_client=apprise_client)
 
     while True:
@@ -96,7 +99,7 @@ def merge_lists(old_list, new_list):
 
 def is_first_run(file):
     """Check if results file exists."""
-    return not os.path.exists(file)
+    return not os.path.exists(file) or os.stat(file).st_size == 0
 
 
 def notify(apprise_client, mac, ip_address):
