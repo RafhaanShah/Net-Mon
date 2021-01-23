@@ -23,7 +23,7 @@ All configuration is done via environment variables:
 
 ## Usage
 - Stand-alone:
-	`python app.py`
+	`sudo python app.py`
 - Docker:
 	```
     docker run -e \
