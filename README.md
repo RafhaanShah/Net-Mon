@@ -30,6 +30,7 @@ All configuration is done via environment variables:
         NETMON_NOTIFICATION=tgram://bottoken/ChatID \
         NETMON_SUBNET=192.168.1.0/24 \
         NETMON_MINUTES=15 \
+        --net=host \
         ghcr.io/rafhaanshah/net-mon:latest
     ```
 - Docker-Compose:
@@ -43,7 +44,8 @@ All configuration is done via environment variables:
             restart: unless-stopped
             network_mode: host # needed for nmap to get mac addresses
             volumes:
-            - ./results:/app/results # optional, if you want to keep found hosts persistent
+            - ./results.json:/app/results.json # optional, if you want to keep found hosts persistent
+                                               # create an empty results.json first
             environment:
             - NETMON_NOTIFICATION=tgram://bottoken/ChatID
             - NETMON_SUBNET=192.168.1.0/24
