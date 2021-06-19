@@ -1,8 +1,5 @@
 # This workflow will build and publish a Docker Image to GitHub Container Registry
 # See https://github.com/docker/build-push-action
-# CR_PAT with write:package is needed as GITHUB_TOKEN does not currently have the required permissions.
-# https://docs.github.com/en/packages/guides/migrating-to-github-container-registry-for-docker-images#authenticating-with-the-container-registry
-# https://docs.github.com/en/packages/guides/using-github-packages-with-github-actions#authenticating-to-github-container-registry
 
 name: Publish Image
 
@@ -34,7 +31,7 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
+        password: ${{ secrets.GITHUB_TOKEN  }}
     
     - name: Cache Docker layers
       uses: actions/cache@v2
