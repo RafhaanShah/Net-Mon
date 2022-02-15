@@ -2,6 +2,8 @@
 
 Get notified for new devices on your network. This app runs [nmap](https://nmap.org/) periodically and saves found hosts, and send you a notification whenever a new device (mac-address) is found.
 
+![](/assets/screenshot.jpg)
+
 ## Prerequisites
 - A notification service supported by [Apprise](https://github.com/caronc/apprise#popular-notification-services) and the required API keys or other configuration for your chosen services
 - Have [Python](https://www.python.org/) 3.8+ or [Docker](https://www.docker.com/) installed
