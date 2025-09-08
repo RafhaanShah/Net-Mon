@@ -14,39 +14,43 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       
-    - name: Set version variable
+    - name: Set version variables
       id: vars
-      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      
+      run: |
+        TAG=${GITHUB_REF#refs/*/}
+        MAJOR=$(echo $TAG | grep -oP '^v\d+')
+        MINOR=$(echo $TAG | grep -oP '^v\d+\.\d+')
+        PATCH=$TAG
+        echo "::set-output name=major::$MAJOR"
+        echo "::set-output name=minor::$MINOR"
+        echo "::set-output name=patch::$PATCH"
+
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v3
     
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v3
    
     - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1 
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
-        username: ${{ github.repository_owner }}
+        username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN  }}
-    
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: ${{ runner.os }}-buildx-
     
     - name: Build and push
       id: docker_build
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v6
       with:
         push: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         tags: |
-          ghcr.io/rafhaanshah/net-mon:${{ steps.vars.outputs.tag }}
+          ghcr.io/rafhaanshah/net-mon:${{ steps.vars.outputs.major }}
+          ghcr.io/rafhaanshah/net-mon:${{ steps.vars.outputs.minor }}
+          ghcr.io/rafhaanshah/net-mon:${{ steps.vars.outputs.patch }}
           ghcr.io/rafhaanshah/net-mon:latest
 
     - name: Print image digest

@@ -1,12 +1,15 @@
-FROM python:3.9-alpine
+FROM python:3.13-alpine
 
-LABEL org.opencontainers.image.source https://github.com/RafhaanShah/Net-Mon
+LABEL org.opencontainers.image.source="https://github.com/RafhaanShah/Net-Mon"
+
+# https://pkgs.alpinelinux.org/package/edge/main/x86_64/nmap
+ENV NMAP_VERSION="7.97-r0"
 
 RUN apk update && apk add \
-    nmap=7.80-r2 \
+    nmap=${NMAP_VERSION} \
     && rm -rf /var/cache/apk/*
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 

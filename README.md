@@ -6,12 +6,23 @@ Get notified for new devices on your network. This app runs [nmap](https://nmap.
 
 ## Prerequisites
 - A notification service supported by [Apprise](https://github.com/caronc/apprise#popular-notification-services) and the required API keys or other configuration for your chosen services
-- Have [Python](https://www.python.org/) 3.8+ or [Docker](https://www.docker.com/) installed
+- Have [Python](https://www.python.org/) 3.13+ or [Docker](https://www.docker.com/) installed
 
 ## Installation
 This app can be used stand-alone and run with Python, or it is also available as a Docker image.
 If using Python, install the requirements first:
-`pip install -r requirements.txt`
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Upgrade Dependencies:
+```
+pip install pipreqs
+pip install --upgrade -r requirements.txt
+pipreqs --force --ignore .venv
+```
 
 ## Configuration
 All configuration is done via environment variables:
@@ -37,8 +48,6 @@ All configuration is done via environment variables:
     ```
 - Docker-Compose:
     ```
-    version: "3.8"
-
     services:
         net-mon:
             container_name: net-mon

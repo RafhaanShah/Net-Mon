@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
     net-mon:
         container_name: net-mon

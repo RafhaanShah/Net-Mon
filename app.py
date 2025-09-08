@@ -17,6 +17,10 @@ RESULTS = "results.json"
 def main():
     """Run application."""
     print("Starting Net-Mon")
+    service = NOTIFICATION.split("://")[0] if "://" in NOTIFICATION else ""
+    print(f"Notification service: {service}")
+    print(f"Subnet: {SUBNET}")
+    print(f"Scan interval (minutes): {MINUTES}")
 
     apprise_client = get_apprise_client(NOTIFICATION)
     scan_and_process(apprise_client) # first run
@@ -57,8 +61,7 @@ def scan():
 
     result = {}
 
-    for ip_address in scan_result:
-        host = scan_result[ip_address]
+    for ip_address, host in scan_result.items():
         if 'macaddress' in host:
             mcadr = host['macaddress']
             if mcadr and 'addr' in mcadr:
@@ -78,14 +81,14 @@ def process_results(apprise_client, old_list, new_list):
 
 def read_json():
     """Read json to memory."""
-    with open(RESULTS) as file:
+    with open(RESULTS, encoding="utf-8") as file:
         result = json.load(file)
         return result
 
 
 def write_json(result):
     """Write result to json."""
-    with open(RESULTS, 'w') as file:
+    with open(RESULTS, 'w', encoding="utf-8") as file:
         json.dump(result, file)
 
 
