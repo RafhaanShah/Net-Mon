@@ -23,9 +23,9 @@ jobs:
         MAJOR=$(echo $TAG | grep -oP '^v\d+')
         MINOR=$(echo $TAG | grep -oP '^v\d+\.\d+')
         PATCH=$TAG
-        echo "::set-output name=major::$MAJOR"
-        echo "::set-output name=minor::$MINOR"
-        echo "::set-output name=patch::$PATCH"
+        echo "major=$MAJOR" >> $GITHUB_OUTPUT
+        echo "minor=$MINOR" >> $GITHUB_OUTPUT
+        echo "patch=$PATCH" >> $GITHUB_OUTPUT
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
