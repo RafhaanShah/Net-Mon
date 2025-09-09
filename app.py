@@ -1,4 +1,6 @@
 """Run nmap periodically to monitor for and notify when new devices are detected."""
+
+import argparse
 import json
 import os
 import sys
@@ -8,25 +10,55 @@ import apprise
 import nmap3
 import schedule
 
-NOTIFICATION = os.getenv("NETMON_NOTIFICATION", "")
-SUBNET = os.getenv("NETMON_SUBNET", "192.168.1.0/24")
-MINUTES = os.getenv("NETMON_MINUTES", "15")
-RESULTS = "results.json"
+
+def parse_args():
+    """Parse command-line arguments and fallback to environment variables."""
+    parser = argparse.ArgumentParser(
+        description="Run nmap periodically to monitor for new devices."
+    )
+    parser.add_argument(
+        "--notification",
+        default=os.getenv("NETMON_NOTIFICATION", ""),
+        help="Notification URL",
+    )
+    parser.add_argument(
+        "--subnet",
+        default=os.getenv("NETMON_SUBNET", "192.168.1.0/241"),
+        help="Subnet to scan",
+    )
+    parser.add_argument(
+        "--minutes",
+        default=os.getenv("NETMON_MINUTES", "15"),
+        type=int,
+        help="Scan interval in minutes",
+    )
+    parser.add_argument(
+        "--results",
+        default=os.getenv("NETMON_RESULTS", "resultsz.json"),
+        help="Results file path",
+    )
+    return parser.parse_args()
 
 
 def main():
     """Run application."""
+    args = parse_args()
     print("Starting Net-Mon")
-    service = NOTIFICATION.split("://")[0] if "://" in NOTIFICATION else ""
+    service = args.notification.split("://")[0] if "://" in args.notification else ""
     print(f"Notification service: {service}")
-    print(f"Subnet: {SUBNET}")
-    print(f"Scan interval (minutes): {MINUTES}")
+    print(f"Subnet: {args.subnet}")
+    print(f"Scan interval (minutes): {args.minutes}")
 
-    apprise_client = get_apprise_client(NOTIFICATION)
-    scan_and_process(apprise_client) # first run
+    apprise_client = get_apprise_client(args.notification)
+    scan_and_process(apprise_client, args.results, args.subnet)  # first run
 
     # then every x minutes
-    schedule.every(int(MINUTES)).minutes.do(scan_and_process, apprise_client=apprise_client)
+    schedule.every(int(args.minutes)).minutes.do(
+        scan_and_process,
+        apprise_client=apprise_client,
+        results=args.results,
+        subnet=args.subnet,
+    )
 
     while True:
         try:
@@ -37,35 +69,35 @@ def main():
             sys.exit("\tStopping application, bye bye")
 
 
-def scan_and_process(apprise_client):
+def scan_and_process(apprise_client, results, subnet):
     """Scans for new hosts and checks against existing hosts."""
-    new_scan = scan()
+    new_scan = scan(subnet)
 
-    if is_first_run(RESULTS):
+    if is_first_run(results):
         print("First run, found " + str(len(new_scan)) + " hosts")
-        write_json(new_scan)
+        write_json(new_scan, results)
         return
 
-    old_scan = read_json()
+    old_scan = read_json(results)
     process_results(apprise_client, old_scan, new_scan)
     merged = merge_lists(old_scan, new_scan)
-    write_json(merged)
+    write_json(merged, results)
 
 
-def scan():
+def scan(subnet):
     """Do nmap scan and parse mac addresses."""
     nmap = nmap3.NmapScanTechniques()
-    scan_result = nmap.nmap_ping_scan(SUBNET)
-    scan_result.pop('stats', None)
-    scan_result.pop('runtime', None)
+    scan_result = nmap.nmap_ping_scan(subnet)
+    scan_result.pop("stats", None)
+    scan_result.pop("runtime", None)
 
     result = {}
 
     for ip_address, host in scan_result.items():
-        if 'macaddress' in host:
-            mcadr = host['macaddress']
-            if mcadr and 'addr' in mcadr:
-                mac = mcadr['addr']
+        if "macaddress" in host:
+            mcadr = host["macaddress"]
+            if mcadr and "addr" in mcadr:
+                mac = mcadr["addr"]
                 result[mac] = ip_address
 
     return result
@@ -79,16 +111,16 @@ def process_results(apprise_client, old_list, new_list):
             notify(apprise_client, mac, ip_address)
 
 
-def read_json():
+def read_json(results):
     """Read json to memory."""
-    with open(RESULTS, encoding="utf-8") as file:
+    with open(results, encoding="utf-8") as file:
         result = json.load(file)
         return result
 
 
-def write_json(result):
+def write_json(result, results):
     """Write result to json."""
-    with open(RESULTS, 'w', encoding="utf-8") as file:
+    with open(results, "w", encoding="utf-8") as file:
         json.dump(result, file)
 
 

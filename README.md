@@ -25,20 +25,35 @@ pipreqs --force --ignore .venv
 ```
 
 ## Configuration
-All configuration is done via environment variables:
-1. Apprise configuration url, for your chosen providers:
-`NETMON_NOTIFICATION=tgram://bottoken/ChatID`
-2. Subnet for scanning in CIDR form or range form:
-`NETMON_SUBNET=192.168.1.0/24` or `NETMON_SUBNET=192.168.1.1-100`
-3. Interval for scanning, in minutes:
-`NETMON_MINUTES=15`
+You can configure Net-Mon using **environment variables** or **command-line arguments**.
 
+### Environment Variables:
+1. Apprise configuration url, for your chosen providers:
+   - `NETMON_NOTIFICATION=tgram://bottoken/ChatID`
+2. Subnet for scanning in CIDR form or range form:
+   - `NETMON_SUBNET=192.168.1.0/24` or `NETMON_SUBNET=192.168.1.1-100`
+3. Interval for scanning, in minutes:
+   - `NETMON_MINUTES=15`
+4. Results file path (optional, default is `results.json`):
+   - `NETMON_RESULTS=results.json`
+
+### Command-Line Arguments:
+You can also pass these options directly when running the app:
+- `--notification` Notification URL (e.g. `--notification tgram://bottoken/ChatID`)
+- `--subnet` Subnet to scan (e.g. `--subnet 192.168.1.0/24`)
+- `--minutes` Scan interval in minutes (e.g. `--minutes 15`)
+- `--results` Results file path (default: `results.json`)
+
+Example:
+```
+sudo python app.py --notification tgram://bottoken/ChatID --subnet 192.168.1.0/24 --minutes 15 --results results.json
+```
 
 ## Usage
 - Stand-alone:
-	`sudo python app.py`
+    `sudo python app.py`
 - Docker:
-	```
+    ```
     docker run -e \
         NETMON_NOTIFICATION=tgram://bottoken/ChatID \
         NETMON_SUBNET=192.168.1.0/24 \
