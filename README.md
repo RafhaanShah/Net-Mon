@@ -6,11 +6,10 @@ Get notified for new devices on your network. This app runs [nmap](https://nmap.
 
 ## Prerequisites
 - A notification service supported by [Apprise](https://github.com/caronc/apprise#popular-notification-services) and the required API keys or other configuration for your chosen services
-- Have [Python](https://www.python.org/) 3.13+ or [Docker](https://www.docker.com/) installed
+- Have `nmap` already installed on your system
 
-## Installation
-This app can be used stand-alone and run with Python, or it is also available as a Docker image.
-If using Python, install the requirements first:
+## Building
+Install Requirements:
 ```
 python3 -m venv .venv
 source .venv/bin/activate
@@ -23,6 +22,11 @@ pip install pipreqs
 pip install --upgrade -r requirements.txt
 pipreqs --force --ignore .venv
 ```
+
+## Installation
+- If you have Python installed, you can clone the repository and directly run the Python file
+- You can download the latest release artifact from [GitHub Releases](https://github.com/RafhaanShah/Net-Mon/releases)
+- If you have Docker installed, you can run the Docker image
 
 ## Configuration
 You can configure Net-Mon using **environment variables** or **command-line arguments**.
@@ -44,16 +48,13 @@ You can also pass these options directly when running the app:
 - `--minutes` Scan interval in minutes (e.g. `--minutes 15`)
 - `--results` Results file path (default: `results.json`)
 
-Example:
-```
-sudo python app.py --notification tgram://bottoken/ChatID --subnet 192.168.1.0/24 --minutes 15 --results results.json
-```
-
 ## Usage
-- Stand-alone:
-    `sudo python app.py`
+- Python:
+    `sudo python app.py --notification tgram://bottoken/ChatID`
+- Executable:
+    `sudo ./netmon --notification tgram://bottoken/ChatID`
 - Docker:
-    ```
+    ```bash
     docker run -e \
         NETMON_NOTIFICATION=tgram://bottoken/ChatID \
         NETMON_SUBNET=192.168.1.0/24 \
@@ -62,7 +63,7 @@ sudo python app.py --notification tgram://bottoken/ChatID --subnet 192.168.1.0/2
         ghcr.io/rafhaanshah/net-mon:latest
     ```
 - Docker-Compose:
-    ```
+    ```yaml
     services:
         net-mon:
             container_name: net-mon

@@ -4,13 +4,14 @@
 
 name: Publish
 
-on: workflow_dispatch
+on:
+  release:
+    types: [published]
     
 jobs:
   push_to_registry:
     name: Push Docker Image to GitHub Container Registry
     runs-on: ubuntu-latest
-    if: false
     
     steps:
     - name: Checkout repository
@@ -62,7 +63,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest', 'ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-latest']
+        # Windows Defender will complain without signed exe
+        os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-latest']
         python-version: [3.13]
         include:
           - os: ubuntu-24.04
@@ -100,16 +102,9 @@ jobs:
       - name: Build executable
         run: pyinstaller netmon.spec
 
-      - name: Rename executable with OS and arch
-        if: runner.os != 'Windows'
-        run: |
-          ARCH=$(arch)
-          OS=${{ runner.os }}
-          OS=$(echo "${OS}" | tr '[:upper:]' '[:lower:]')
-          mv dist/netmon dist/netmon-${OS}-${ARCH}
-
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: shogo82148/actions-upload-release-asset@v1
         with:
-          name: ${{ runner.os }}
-          path: dist/*
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/netmon
+          asset_name: netmon-${{ runner.os }}-${{ runner.arch }}
