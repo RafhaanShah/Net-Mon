@@ -3,14 +3,13 @@
 
 name: Publish Image
 
-on:
-  release:
-    types: [published]
+on: workflow_dispatch
     
 jobs:
   push_to_registry:
     name: Push Docker Image to GitHub Container Registry
     runs-on: ubuntu-latest
+    if: false
     
     steps:
     - name: Checkout repository
@@ -55,3 +54,55 @@ jobs:
 
     - name: Print image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
+
+  upload_executable:
+    name: Build and upload executable to release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-latest']
+        python-version: [3.13]
+        include:
+          - os: ubuntu-latest
+            path: ~/.cache/pip
+          - os: macos-latest
+            path: ~/Library/Caches/pip
+          - os: windows-latest
+            path: ~\AppData\Local\pip\Cache
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.path }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build executable
+        run: pyinstaller app.spec
+
+      - name: Rename executable with OS and arch
+        if: runner.os != 'Windows'
+        run: |
+          ARCH=$(arch)
+          OS=${{ runner.os }}
+          OS=$(echo "${OS}" | tr '[:upper:]' '[:lower:]')
+          mv dist/netmon dist/netmon-${OS}-${ARCH}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist/*
