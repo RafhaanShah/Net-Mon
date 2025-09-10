@@ -63,8 +63,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows Defender will complain without signed exe
-        os: ['ubuntu-24.04', 'ubuntu-24.04-arm', 'macos-latest']
         python-version: [3.13]
         include:
           - os: ubuntu-24.04
@@ -73,8 +71,6 @@ jobs:
             path: ~/.cache/pip
           - os: macos-latest
             path: ~/Library/Caches/pip
-          - os: windows-latest
-            path: ~\AppData\Local\pip\Cache
 
     steps:
       - name: Checkout repository
@@ -102,9 +98,15 @@ jobs:
       - name: Build executable
         run: pyinstaller netmon.spec
 
+      - name: Set artifact variables
+        id: artifact_vars
+        run: |
+          echo "os_lower=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          echo "arch_lower=$(echo ${{ runner.arch }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Upload artifacts
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: dist/netmon
-          asset_name: netmon-${{ runner.os }}-${{ runner.arch }}
+          asset_name: netmon-${{ steps.artifact_vars.outputs.os_lower }}-${{ steps.artifact_vars.outputs.arch_lower }}
